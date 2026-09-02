@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediVault — Patient Dashboard</title>
+    <style>
+        /* ===== Same global styles ===== */
+        :root {
+            --primary: #0b7cff;
+            --primary-dark: #075dcc;
+            --primary-soft: #eaf4ff;
+            --primary-gradient: linear-gradient(135deg, #0b7cff, #4c9fff);
+            --secondary: #12b886;
+            --secondary-soft: #e9fbf5;
+            --dark: #102033;
+            --text: #44546a;
+            --muted: #718096;
+            --white: #ffffff;
+            --light: #f7faff;
+            --border: #dfe8f2;
+            --shadow-sm: 0 5px 20px rgba(18, 46, 79, 0.06);
+            --shadow-md: 0 15px 45px rgba(18, 46, 79, 0.09);
+            --shadow-lg: 0 25px 70px rgba(18, 46, 79, 0.13);
+            --radius-sm: 10px;
+            --radius-md: 18px;
+            --radius-lg: 28px;
+            --container: 1240px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            --touch-min: 44px;
+        }
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: var(--font);
+            background: var(--light);
+            color: var(--text);
+            line-height: 1.65;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+        button {
+            border: none;
+            cursor: pointer;
+            background: none;
+            touch-action: manipulation;
+        }
+        .container {
+            width: min(calc(100% - 32px), var(--container));
+            margin: 0 auto;
+        }
+        .section {
+            padding: 60px 0;
+        }
+        .text-center {
+            text-align: center;
+        }
+
+        /* ===== TOP NOTICE ===== */
+        .top-notice {
+            background: var(--dark);
+            color: #dce8f6;
+            min-height: 38px;
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            overflow: hidden;
+        }
+        .top-notice-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .notice-left,
+        .notice-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+        .notice-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            white-space: nowrap;
+        }
+        .notice-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--secondary);
+            box-shadow: 0 0 0 4px rgba(18, 184, 134, 0.15);
+            flex-shrink: 0;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(223, 232, 242, 0.8);
+            transition: box-shadow var(--transition);
+        }
+        .navbar.scrolled {
+            box-shadow: var(--shadow-sm);
+        }
+        .nav-inner {
+            min-height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            touch-action: manipulation;
+        }
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--primary-gradient);
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            font-size: 18px;
+            box-shadow: 0 8px 20px rgba(11, 124, 255, 0.24);
+            flex-shrink: 0;
+        }
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+        .brand-name {
+            color: var(--dark);
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+        }
+        .brand-tagline {
+            color: var(--muted);
+            font-size: 9px;
+            letter-spacing: 0.3px;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            flex: 1;
+        }
+        .nav-link {
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--transition);
+            touch-action: manipulation;
+            min-height: var(--touch-min);
+            display: flex;
+            align-items: center;
+        }
+        .nav-link:hover,
+        .nav-link:focus-visible {
+            color: var(--primary);
+            background: var(--primary-soft);
+        }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .btn {
+            min-height: var(--touch-min);
+            padding: 0 18px;
+            border-radius: 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+            white-space: nowrap;
+            touch-action: manipulation;
+            user-select: none;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn-primary {
+            color: white;
+            background: var(--primary-gradient);
+            box-shadow: 0 8px 22px rgba(11, 124, 255, 0.22);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 12px 28px rgba(11, 124, 255, 0.32);
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            color: var(--primary);
+            border: 1px solid #c9def5;
+            background: white;
+        }
+        .btn-outline:hover {
+            background: var(--primary-soft);
+            transform: translateY(-2px);
+        }
+        .btn-soft {
+            color: var(--primary);
+            background: var(--primary-soft);
+        }
+        .btn-sm {
+            min-height: 38px;
+            padding: 0 14px;
+            font-size: 12px;
+        }
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+        .menu-toggle {
+            display: none;
+            width: var(--touch-min);
+            height: var(--touch-min);
+            border-radius: 11px;
+            background: var(--light);
+            color: var(--dark);
+            font-size: 20px;
+            touch-action: manipulation;
+            flex-shrink: 0;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #0c1d30;
+            color: #a9b9c9;
+            padding: 55px 0 20px;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.3fr repeat(3, 1fr);
+            gap: 40px;
+        }
+        .footer-brand p {
+            max-width: 320px;
+            margin-top: 12px;
+            font-size: 10px;
+            line-height: 1.8;
+            color: #8fa3b8;
+        }
+        .footer .brand-name {
+            color: white;
+        }
+        .footer .brand-tagline {
+            color: #7890a8;
+        }
+        .footer-title {
+            color: white;
+            font-size: 11px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: 0.3px;
+        }
+        .footer-links {
+            list-style: none;
+            display: grid;
+            gap: 7px;
+        }
+        .footer-links a {
+            color: #8fa3b8;
+            font-size: 9px;
+            transition: var(--transition);
+            touch-action: manipulation;
+            padding: 3px 0;
+            display: inline-block;
+        }
+        .footer-links a:hover {
+            color: white;
+        }
+        .footer-bottom {
+            margin-top: 40px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .footer-bottom span {
+            font-size: 8px;
+            color: #71879c;
+        }
+        .footer-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 8px;
+            color: #71879c;
+        }
+        .footer-status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--secondary);
+            flex-shrink: 0;
+        }
+
+        /* ===== BACK TO TOP ===== */
+        .back-top {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 1500;
+            width: var(--touch-min);
+            height: var(--touch-min);
+            border-radius: 12px;
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: var(--transition);
+            touch-action: manipulation;
+            display: grid;
+            place-items: center;
+            font-size: 18px;
+        }
+        .back-top.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            right: 16px;
+            bottom: 80px;
+            z-index: 5000;
+            max-width: 340px;
+            background: var(--dark);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(100px);
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 10px;
+            line-height: 1.5;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* ===== PAGE-SPECIFIC: DASHBOARD ===== */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .dashboard-header h1 {
+            color: var(--dark);
+            font-size: 28px;
+            font-weight: 850;
+            letter-spacing: -0.6px;
+        }
+        .dashboard-header p {
+            color: var(--muted);
+            font-size: 14px;
+        }
+        .dashboard-header .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px 8px 12px;
+            background: white;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .dashboard-header .user-badge .avatar-sm {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            font-size: 14px;
+        }
+        .dashboard-header .user-badge strong {
+            color: var(--dark);
+            font-size: 13px;
+        }
+        .dashboard-header .user-badge small {
+            color: var(--muted);
+            font-size: 10px;
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        .stat-card .stat-number {
+            font-size: 30px;
+            font-weight: 850;
+            color: var(--dark);
+            letter-spacing: -0.5px;
+        }
+        .stat-card .stat-label {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .stat-card .stat-icon {
+            font-size: 22px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        .dashboard-panel {
+            background: white;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+        .dashboard-panel .panel-title {
+            color: var(--dark);
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dashboard-panel .panel-title a {
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .dashboard-panel .panel-title a:hover {
+            text-decoration: underline;
+        }
+
+        .appointment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .appointment-item:last-child {
+            border-bottom: none;
+        }
+        .appointment-item .appt-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .appointment-item .appt-info strong {
+            color: var(--dark);
+            font-size: 14px;
+        }
+        .appointment-item .appt-info span {
+            color: var(--muted);
+            font-size: 12px;
+        }
+        .appointment-item .appt-status {
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .appointment-item .appt-status.confirmed {
+            background: var(--secondary-soft);
+            color: #087d5a;
+        }
+        .appointment-item .appt-status.pending {
+            background: #fff8e6;
+            color: #a45b00;
+        }
+        .appointment-item .appt-status.cancelled {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .quick-actions .btn {
+            justify-content: center;
+            font-size: 12px;
+            min-height: 44px;
+        }
+
+        .recent-activity {
+            display: grid;
+            gap: 10px;
+        }
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+        }
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        .activity-item .activity-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .activity-item .activity-text {
+            color: var(--text);
+        }
+        .activity-item .activity-text strong {
+            color: var(--dark);
+        }
+        .activity-item .activity-time {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 10px;
+            flex-shrink: 0;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1100px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .footer-grid {
+                grid-template-columns: 1.5fr 1fr 1fr;
+            }
+            .footer-grid>div:last-child {
+                grid-column: span 3;
+            }
+        }
+        @media (max-width: 900px) {
+            .top-notice {
+                display: none;
+            }
+            .nav-inner {
+                min-height: 62px;
+            }
+            .menu-toggle {
+                display: grid;
+                place-items: center;
+            }
+            .nav-links {
+                position: fixed;
+                top: 62px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: white;
+                flex-direction: column;
+                align-items: stretch;
+                justify-content: flex-start;
+                padding: 20px 24px;
+                gap: 4px;
+                transform: translateX(100%);
+                transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+                overflow-y: auto;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+                z-index: 999;
+            }
+            .nav-links.active {
+                transform: translateX(0);
+            }
+            .nav-link {
+                padding: 14px 16px;
+                font-size: 15px;
+                min-height: 50px;
+                border-radius: 12px;
+            }
+            .nav-actions {
+                margin-left: auto;
+            }
+            .nav-actions .btn-outline {
+                display: none;
+            }
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .dashboard-header .user-badge {
+                align-self: stretch;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+            .footer-grid>div:last-child {
+                grid-column: span 2;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+        @media (max-width: 700px) {
+            .container {
+                width: min(calc(100% - 24px), var(--container));
+            }
+            .section {
+                padding: 40px 0;
+            }
+            .brand-tagline {
+                display: none;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .stat-card {
+                padding: 16px;
+            }
+            .stat-card .stat-number {
+                font-size: 24px;
+            }
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .footer-grid>div:last-child {
+                grid-column: span 1;
+            }
+            .appointment-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+        }
+        @media (max-width: 450px) {
+            .nav-actions {
+                display: none;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .dashboard-panel {
+                padding: 16px;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+        @media (hover: none) {
+            .btn:hover {
+                transform: none !important;
+            }
+            .stat-card:hover {
+                transform: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NOTICE -->
+    <div class="top-notice" role="banner">
+        <div class="container top-notice-inner">
+            <div class="notice-left">
+                <div class="notice-item"><span class="notice-dot" aria-hidden="true"></span><span>Digital healthcare platform</span></div>
+                <div class="notice-item"><span>Appointment booking</span></div>
+            </div>
+            <div class="notice-right">
+                <div class="notice-item"><span>Patient</span></div>
+                <div class="notice-item"><span>Doctor</span></div>
+                <div class="notice-item"><span>Admin</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <header class="navbar" role="banner">
+        <div class="container nav-inner">
+            <a href="/" class="brand" aria-label="MediVault Home">
+                <div class="brand-logo" aria-hidden="true">M</div>
+                <div class="brand-text">
+                    <span class="brand-name">MediVault</span>
+                    <span class="brand-tagline">Appointments • Records • Care</span>
+                </div>
+            </a>
+            <nav class="nav-links" id="navLinks" role="navigation" aria-label="Main navigation">
+                <a href="/doctors.html" class="nav-link">Find Doctors</a>
+                <a href="/#how-it-works" class="nav-link">How It Works</a>
+                <a href="/#records" class="nav-link">Medical Records</a>
+                <a href="/#security" class="nav-link">Security</a>
+                <a href="/#faq" class="nav-link">FAQ</a>
+            </nav>
+            <div class="nav-actions">
+                <a href="/login.html" class="btn btn-outline">Login</a>
+                <a href="/register.html" class="btn btn-primary">Create Account</a>
+            </div>
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation menu" aria-expanded="false">☰</button>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main>
+        <section class="section">
+            <div class="container">
+
+                <!-- Dashboard Header -->
+                <div class="dashboard-header">
+                    <div>
+                        <h1>Patient Dashboard</h1>
+                        <p>Welcome back, John! Here's your health at a glance.</p>
+                    </div>
+                    <div class="user-badge">
+                        <div class="avatar-sm">JD</div>
+                        <div>
+                            <strong>John Doe</strong>
+                            <small>Patient ID: #P-2026-001</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-icon">📅</span>
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Upcoming Appointments</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">📋</span>
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Total Visits</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">💊</span>
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Active Prescriptions</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">📊</span>
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Medical Reports</div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Grid -->
+                <div class="dashboard-grid">
+
+                    <!-- Left: Appointments -->
+                    <div class="dashboard-panel">
+                        <div class="panel-title">
+                            <span>Upcoming Appointments</span>
+                            <a href="/patient-appointments.html">View all →</a>
+                        </div>
+
+                        <div class="appointment-item">
+                            <div class="appt-info">
+                                <strong>Dr. Ananya Sharma</strong>
+                                <span>General Medicine • 12 Sep 2026, 10:30 AM</span>
+                                <span>City Care Clinic • Chamber 04</span>
+                            </div>
+                            <span class="appt-status confirmed">Confirmed</span>
+                        </div>
+
+                        <div class="appointment-item">
+                            <div class="appt-info">
+                                <strong>Dr. Rahul Sen</strong>
+                                <span>Cardiology • 15 Sep 2026, 4:00 PM</span>
+                                <span>HeartPlus Centre • Chamber 3B</span>
+                            </div>
+                            <span class="appt-status pending">Pending</span>
+                        </div>
+
+                        <div class="appointment-item">
+                            <div class="appt-info">
+                                <strong>Dr. Meera Kapoor</strong>
+                                <span>Dermatology • 20 Sep 2026, 11:00 AM</span>
+                                <span>SkinCare Studio • Chamber 101</span>
+                            </div>
+                            <span class="appt-status confirmed">Confirmed</span>
+                        </div>
+
+                        <div style="margin-top:16px;">
+                            <a href="/book-appointment.html" class="btn btn-primary btn-block">Book New Appointment</a>
+                        </div>
+                    </div>
+
+                    <!-- Right: Quick Actions & Activity -->
+                    <div>
+                        <div class="dashboard-panel" style="margin-bottom:16px;">
+                            <div class="panel-title">
+                                <span>Quick Actions</span>
+                            </div>
+                            <div class="quick-actions">
+                                <a href="/doctors.html" class="btn btn-primary">🔍 Find Doctor</a>
+                                <a href="/patient-medical-records.html" class="btn btn-outline">📋 My Records</a>
+                                <a href="/patient-appointments.html" class="btn btn-outline">📅 Appointments</a>
+                                <a href="/patient-profile.html" class="btn btn-outline">👤 Profile</a>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-panel">
+                            <div class="panel-title">
+                                <span>Recent Activity</span>
+                            </div>
+                            <div class="recent-activity">
+                                <div class="activity-item">
+                                    <span class="activity-icon">📋</span>
+                                    <span class="activity-text"><strong>Prescription</strong> issued by Dr. Sharma</span>
+                                    <span class="activity-time">2 days ago</span>
+                                </div>
+                                <div class="activity-item">
+                                    <span class="activity-icon">📊</span>
+                                    <span class="activity-text"><strong>Report</strong> uploaded: Blood Test</span>
+                                    <span class="activity-time">5 days ago</span>
+                                </div>
+                                <div class="activity-item">
+                                    <span class="activity-icon">📅</span>
+                                    <span class="activity-text"><strong>Appointment</strong> booked with Dr. Sen</span>
+                                    <span class="activity-time">1 week ago</span>
+                                </div>
+                                <div class="activity-item">
+                                    <span class="activity-icon">✅</span>
+                                    <span class="activity-text"><strong>Visit</strong> completed at City Care</span>
+                                    <span class="activity-time">2 weeks ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="/" class="brand">
+                        <div class="brand-logo" aria-hidden="true">M</div>
+                        <div class="brand-text">
+                            <span class="brand-name">MediVault</span>
+                            <span class="brand-tagline">Appointments • Records • Care</span>
+                        </div>
+                    </a>
+                    <p>A modern healthcare platform connecting doctor discovery, clinic-based appointment booking and digital medical records.</p>
+                </div>
+                <div>
+                    <div class="footer-title">Patients</div>
+                    <ul class="footer-links">
+                        <li><a href="/doctors.html">Find Doctors</a></li>
+                        <li><a href="/register.html">Create Account</a></li>
+                        <li><a href="/patient-dashboard.html">Dashboard</a></li>
+                        <li><a href="/patient-appointments.html">Appointments</a></li>
+                        <li><a href="/patient-medical-records.html">Medical Records</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="footer-title">Doctors</div>
+                    <ul class="footer-links">
+                        <li><a href="/doctor-register.html">Registration</a></li>
+                        <li><a href="/doctor-login.html">Login</a></li>
+                        <li><a href="/doctor-dashboard.html">Dashboard</a></li>
+                        <li><a href="/doctor-clinics.html">My Clinics</a></li>
+                        <li><a href="/doctor-appointments.html">Appointments</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="footer-title">Admin</div>
+                    <ul class="footer-links">
+                        <li><a href="/admin-login.html">Admin Login</a></li>
+                        <li><a href="/admin-dashboard.html">Dashboard</a></li>
+                        <li><a href="/admin-doctors.html">Doctors</a></li>
+                        <li><a href="/admin-complaints.html">Complaints</a></li>
+                        <li><a href="/admin-audit-logs.html">Audit Logs</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2026 MediVault. Demo interface.</span>
+                <div class="footer-status">
+                    <span class="footer-status-dot" aria-hidden="true"></span>
+                    <span>All pages served from root <strong>/</strong></span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- BACK TO TOP -->
+    <button class="back-top" id="backTop" aria-label="Back to top">↑</button>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+    <script>
+        (function() {
+            var menuToggle = document.getElementById('menuToggle');
+            var navLinks = document.getElementById('navLinks');
+            if (menuToggle && navLinks) {
+                menuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var isActive = navLinks.classList.toggle('active');
+                    document.body.classList.toggle('menu-open', isActive);
+                    menuToggle.textContent = isActive ? '✕' : '☰';
+                    menuToggle.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+                });
+                navLinks.querySelectorAll('.nav-link').forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        navLinks.classList.remove('active');
+                        document.body.classList.remove('menu-open');
+                        menuToggle.textContent = '☰';
+                        menuToggle.setAttribute('aria-expanded', 'false');
+                    });
+                });
+                document.addEventListener('click', function(e) {
+                    if (navLinks.classList.contains('active')) {
+                        var target = e.target;
+                        if (!navLinks.contains(target) && !menuToggle.contains(target)) {
+                            navLinks.classList.remove('active');
+                            document.body.classList.remove('menu-open');
+                            menuToggle.textContent = '☰';
+                            menuToggle.setAttribute('aria-expanded', 'false');
+                        }
+                    }
+                });
+            }
+
+            var navbar = document.querySelector('.navbar');
+            if (navbar) {
+                window.addEventListener('scroll', function() {
+                    navbar.classList.toggle('scrolled', window.scrollY > 20);
+                });
+            }
+
+            var backTop = document.getElementById('backTop');
+            if (backTop) {
+                window.addEventListener('scroll', function() {
+                    backTop.classList.toggle('show', window.scrollY > 400);
+                });
+                backTop.addEventListener('click', function() {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+
+            var toastEl = document.getElementById('toast');
+            window.showToast = function(message, duration) {
+                duration = duration || 3000;
+                if (!toastEl) return;
+                toastEl.textContent = message;
+                toastEl.classList.add('show');
+                clearTimeout(toastEl._hideTimer);
+                toastEl._hideTimer = setTimeout(function() {
+                    toastEl.classList.remove('show');
+                }, duration);
+            };
+
+            document.querySelectorAll('.quick-actions .btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    var href = this.getAttribute('href');
+                    if (href && !href.startsWith('/')) {
+                        e.preventDefault();
+                        showToast('This is a demo link.', 1500);
+                    }
+                });
+            });
+
+            console.log('MediVault · Patient Dashboard loaded.');
+        })();
+    </script>
+</body>
+</html>
